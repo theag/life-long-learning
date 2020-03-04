@@ -1,0 +1,81 @@
+{% load static %}
+<head>
+    <title>Lifelong Learning - Members</title>
+    <link href="{% static 'styles.css' %}" type="text/css" rel="stylesheet"></link>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <script>
+        function doSubmit(action) {
+            document.getElementById("hdnAction").value = action;
+            document.getElementById("frmMain").submit();
+        }
+        
+        function confirmDelete(name, id) {
+            document.getElementById("hdnMemberID").value = id;
+            document.getElementById("divDeleteMsg").innerText = "Are you sure that you wish to delete member " + name +"?";
+            document.getElementById("divDelete").style.display = "block";
+        }
+    </script>
+</head>
+<body>
+    <h1>Members</h1>
+    <form id="frmMain" action="{% url 'members:index' %}" method="post">
+        {% csrf_token %}
+        <input type="hidden" id="hdnAction" name="action" value="search" />
+        <table class="table-form">
+            <tr>
+                <td>Name:</td>
+                <td><input type="text" name="name" /></td>
+                <td>Year of Membership:</td>
+                <td><input type="text" name="memberyear" /></td>
+            </tr>
+            <tr>
+                <td>Is Instructor:</td>
+                <td><input type="checkbox" name="IsInstructor" /></td>
+            </tr>
+        </table>
+        <div style="margin-top:20px">
+            <input type="submit" value="Search" />
+            <input type="button" value="Reset" onclick="doSubmit('reset')" />
+        </div>
+        <input type="hidden" id="hdnMemberID" name="member_id" />
+    </form>
+    <div style="margin-bottom:10px"><input type="button" value="Add New Member" onclick="window.location = '{% url 'members:add' %}'" /></div>
+    <table class="addBorder">
+        <tr>
+            <th>Name</th>
+            <th>Email</th>
+            <th>Phone</th>
+            <th>Location</th>
+            <th>Membership<br/>Years</th>
+            <th>Number<br/>Courses Attended</th>
+            <th>Is Instructor</th>
+            <th>Notes/Courses Taught</th>
+        </tr>
+        {% for member in members %}
+        <tr>
+            <td>{{member.last_name}}, {{member.first_name}}</td>
+            <td>{{member.email}}</td>
+            <td>{{member.phone_number}}</td>
+            <td>{{member.location.name}}</td>
+            <td>{{member.membership_years_display}}</td>
+            <td>0</td>
+            <td></td>
+            <td>{{member.notes}}</td>
+            <td>
+                <a class="plain" href="{% url 'members:edit' member.id %}"><i class="material-icons">edit</i></a>
+                <a class="plain" href="javascript:confirmDelete('{{member.first_name}} {{member.last_name}}',{{member.id}})"><i class="material-icons">delete</i></a>
+            </td>
+        </tr>
+        {% endfor %}
+    </table>
+    <div class="gray" id="divDelete">
+        <div class="popup">
+            <div>Delete</div>
+            <div id="divDeleteMsg"></div>
+            <div>
+                <input type="button" onclick="doSubmit('delete');" value="Yes" />
+                <input type="button" onclick="document.getElementById('divDelete').style.display='';" value="No" />
+            </div>
+        </div>
+    </div>
+</body>

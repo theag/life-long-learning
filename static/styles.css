@@ -1,0 +1,77 @@
+body {
+    font-family: Arial, sans-serif;
+    margin: 8px 0 0 8px;
+}
+
+.table-form td:nth-child(odd) {
+    text-align: right;
+}
+
+.table-form td:nth-child(odd):not(:first-child) {
+    padding-left: 10px;
+}
+
+.addBorder {
+    border-collapse: collapse;
+}
+
+.addBorder, .addBorder td, .addBorder th {
+    border: 1px solid black;
+}
+
+.addBorder td, .addBorder th {
+    padding-left: 5px;
+    padding-right: 5px;
+}
+
+.gray {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+    background-color: rgba(0,0,0,0.4);
+    display: none;
+}
+
+.popup {
+    border: 3px solid LightGreen;
+    background-color: white;
+    padding: 0;
+    width: 442px;
+    margin: 15% auto;
+}
+
+.popup > div:first-child {
+    margin: 0;
+    padding: 0;
+    background-color: LightGreen;
+    width: 100%;
+}
+
+.popup > div:nth-child(n+2) {
+    margin: 5px;
+}
+
+.ul-form {
+    list-style-type: none;
+}
+
+.ul-form li {
+    padding-top: 5px;
+}
+
+.ul-form textarea {
+    display: block;
+}
+
+.ul-form .errorlist {
+    list-style-type: none;
+    color: red;
+}
+
+a.plain {
+    color: black;
+    text-decoration: none;
+}

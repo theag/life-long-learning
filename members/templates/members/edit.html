@@ -1,0 +1,22 @@
+{% load static %}
+<head>
+    <title>Lifelong Learning - Members</title>
+    <link href="{% static 'styles.css' %}" type="text/css" rel="stylesheet"></link>
+</head>
+<body>
+    <h1>{{header}}</h1>
+    {% if add %}
+    <form action="{% url 'members:add' %}" method="post">
+    {% else %}
+    <form action="{% url 'members:edit' form.instance.id %}" method="post">
+    {% endif %}
+        {% csrf_token %}
+        <ul class="ul-form">
+            {{form.as_ul}}
+        </ul>
+        <div>
+            <input type="submit" value="Save" />
+            <input type="button" value="Cancel" onclick="window.location='{% url 'members:index' %}'" />
+        </div>
+    </form>
+</body>
