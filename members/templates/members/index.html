@@ -18,15 +18,23 @@
 </head>
 <body>
     <h1>Members</h1>
+    <a href="{% url 'members:courses' %}">Courses</a>
     <form id="frmMain" action="{% url 'members:index' %}" method="post">
         {% csrf_token %}
         <input type="hidden" id="hdnAction" name="action" value="search" />
         <table class="table-form">
             <tr>
                 <td>Name:</td>
-                <td><input type="text" name="name" /></td>
+                <td><input type="text" name="name" value="{{name}}" /></td>
                 <td>Year of Membership:</td>
-                <td><input type="text" name="memberyear" /></td>
+                <td>
+                    <select  name="membership_year">
+                        <option value="-1"{% if membership_year == -1 %} selected{% endif %}></option>
+                        {% for y in years %}
+                        <option value="{{y.id}}"{% if membership_year == y.id %} selected{% endif %}>{{y.value}}</option>
+                        {% endfor %}
+                    </select>
+                </td>
             </tr>
             <tr>
                 <td>Is Instructor:</td>
@@ -58,8 +66,8 @@
             <td>{{member.phone_number}}</td>
             <td>{{member.location.name}}</td>
             <td>{{member.membership_years_display}}</td>
-            <td>0</td>
-            <td></td>
+            <td>{{member.course_set.len}}</td>
+            <td>{{member.is_instructor}}</td>
             <td>{{member.notes}}</td>
             <td>
                 <a class="plain" href="{% url 'members:edit' member.id %}"><i class="material-icons">edit</i></a>

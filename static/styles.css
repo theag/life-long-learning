@@ -54,7 +54,7 @@ body {
     margin: 5px;
 }
 
-.ul-form {
+.ul-form, .ul-form ul {
     list-style-type: none;
 }
 
@@ -67,7 +67,6 @@ body {
 }
 
 .ul-form .errorlist {
-    list-style-type: none;
     color: red;
 }
 

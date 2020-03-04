@@ -1,5 +1,5 @@
 from django.db import models
-from django.forms import ModelForm
+from django import forms
 from django.core.validators import RegexValidator
 
 class Location(models.Model):
@@ -8,7 +8,11 @@ class Location(models.Model):
         return self.name
         
 class Year(models.Model):
+    class Meta:
+        ordering = ['-value']
     value = models.PositiveSmallIntegerField()
+    def __str__(self):
+        return "{}".format(self.value)
 
 class Member(models.Model):
     first_name = models.CharField(max_length=200)
@@ -19,18 +23,38 @@ class Member(models.Model):
     membership_years = models.ManyToManyField('Year')
     notes = models.TextField(blank=True)
     
+    def __str__(self):
+        return "{}, {}".format(self.last_name,self.first_name)
+    
     def membership_years_display(self):
         rv = ''
-        for y in self.membership_years.all().order_by(value):
+        for y in self.membership_years.all().order_by('value'):
             if len(rv) > 0:
                 rv += ', '
-            rv += y
+            rv += "{}".format(y)
         return rv
+        
+    def is_instructor(self):
+        if len(self.taught.all()) > 0:
+            return "Yes"
+        else:
+            return "No"
 
-class MemberForm(ModelForm):
+class MemberForm(forms.ModelForm):
     class Meta:
         model = Member
         fields = '__all__'
+        widgets = {'membership_years':forms.CheckboxSelectMultiple(choices=[(i,i) for i in range(2010,2021)])}
         
-#class Course(models.Model):
+class Course(models.Model):
+    name = models.CharField(max_length=200)
+    year = models.ForeignKey(Year,on_delete=models.CASCADE)
+    instructor = models.ForeignKey(Member,on_delete=models.CASCADE,related_name='taught')
+    description = models.TextField(blank=True)
+    students = models.ManyToManyField(Member)
+
+class CourseForm(forms.ModelForm):
+    class Meta:
+        model = Course
+        fields = ['name','year','instructor','description']
     

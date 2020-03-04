@@ -1,0 +1,90 @@
+{% load static %}
+<head>
+    <title>Lifelong Learning - Courses</title>
+    <link href="{% static 'styles.css' %}" type="text/css" rel="stylesheet"></link>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <script>
+        function doSubmit(action) {
+            document.getElementById("hdnAction").value = action;
+            document.getElementById("frmMain").submit();
+        }
+        
+        function confirmDelete(name, id) {
+            document.getElementById("hdnCourseID").value = id;
+            document.getElementById("divDeleteMsg").innerText = "Are you sure that you wish to delete course " + name +"?";
+            document.getElementById("divDelete").style.display = "block";
+        }
+    </script>
+</head>
+<body>
+    <h1>Courses</h1>
+    <a href="{% url 'members:index' %}">Members</a>
+    <form id="frmMain" action="{% url 'members:courses' %}" method="post">
+        {% csrf_token %}
+        <input type="hidden" id="hdnAction" name="action" value="search" />
+        <table class="table-form">
+            <tr>
+                <td>Name:</td>
+                <td><input type="text" name="name" value="{{name}}" /></td>
+                <td>Year:</td>
+                <td>
+                    <select  name="year">
+                        <option value="-1"{% if year == -1 %} selected{% endif %}></option>
+                        {% for y in years %}
+                        <option value="{{y.id}}"{% if year == y.id %} selected{% endif %}>{{y.value}}</option>
+                        {% endfor %}
+                    </select>
+                </td>
+            </tr>
+            <tr>
+                <td>Instructor:</td>
+                <td>
+                    <select  name="instructor">
+                        <option value="-1"{% if instructor == -1 %} selected{% endif %}></option>
+                        {% for m in members %}
+                        <option value="{{m.id}}"{% if instructor == y.id %} selected{% endif %}>{{m.last_name}}, {{m.first_name}}</option>
+                        {% endfor %}
+                    </select>
+                </td>
+            </tr>
+        </table>
+        <div style="margin-top:20px">
+            <input type="submit" value="Search" />
+            <input type="button" value="Reset" onclick="doSubmit('reset')" />
+        </div>
+        <input type="hidden" id="hdnCourseID" name="course_id" />
+    </form>
+    <div style="margin-bottom:10px"><input type="button" value="Add New Course" onclick="window.location = '{% url 'members:add_course' %}'" /></div>
+    <table class="addBorder">
+        <tr>
+            <th>Name</th>
+            <th>Year</th>
+            <th>Instructor</th>
+            <th>Student Count</th>
+            <th>Description</th>
+        </tr>
+        {% for c in courses %}
+        <tr>
+            <td>{{c.name}}</td>
+            <td>{{c.year.value}}</td>
+            <td>{{c.instructor.last_name}}, {{c.instructor.first_name}}</td>
+            <td>{{c.students.len}}</td>
+            <td>{{c.description}}</td>
+            <td>
+                <a class="plain" href="{% url 'members:edit_course' c.id %}"><i class="material-icons">edit</i></a>
+                <a class="plain" href="javascript:confirmDelete('{{c.name}}',{{c.id}})"><i class="material-icons">delete</i></a>
+            </td>
+        </tr>
+        {% endfor %}
+    </table>
+    <div class="gray" id="divDelete">
+        <div class="popup">
+            <div>Delete</div>
+            <div id="divDeleteMsg"></div>
+            <div>
+                <input type="button" onclick="doSubmit('delete');" value="Yes" />
+                <input type="button" onclick="document.getElementById('divDelete').style.display='';" value="No" />
+            </div>
+        </div>
+    </div>
+</body>

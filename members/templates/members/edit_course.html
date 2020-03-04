@@ -1,0 +1,66 @@
+{% load static %}
+<head>
+    <title>Lifelong Learning - Courses</title>
+    <link href="{% static 'styles.css' %}" type="text/css" rel="stylesheet"></link>
+    <script>
+        function doSubmit(action) {
+            document.getElementById("hdnAction").value = action;
+            document.getElementById("frmMain").submit();
+        }
+        
+        function confirmDelete(name, id) {
+            document.getElementById("hdnMemberID").value = id;
+            document.getElementById("divDeleteMsg").innerText = "Are you sure that you wish to delete member " + name +"?";
+            document.getElementById("divDelete").style.display = "block";
+        }
+    </script>
+</head>
+<body>
+    <h1>{{header}}</h1>
+    {% if add %}
+    <form id="frmMain" action="{% url 'members:add_course' %}" method="post">
+    {% csrf_token %}
+    <input type="hidden" id="hdnAction" name="action" value="add" />
+    {% else %}
+    <form id="frmMain" action="{% url 'members:edit_course' form.instance.id %}" method="post">
+    {% csrf_token %}
+    <input type="hidden" id="hdnAction" name="action" value="edit" />
+    {% endif %}
+        <ul class="ul-form">
+            {{form.as_ul}}
+        </ul>
+        {% if not add %}
+        <table class="addBorder">
+            <tr>
+                <th>Name</th>
+                <th>Member Course Year</th>
+            </tr>
+            {% if members %}
+            <tr>
+                <td>
+                    <div style="color:red">{{student_error}}</div>
+                    <select name="student">
+                        {% for m in members %}
+                        <option value="{{m.id}}">{{m.last_name}}, {{m.first_name}}</option>
+                        {% endfor %}
+                    </select>
+                </td>
+                <td><input type="button" value="Add" onclick="doSubmit('add')" /></td>
+            </tr>
+            {% endif %}
+            {% for m in students %}
+            <tr>
+                <td>{{m.last_name}}, {{m.first_name}}</td>
+                <td></td>
+            </tr>
+            {% endfor %}
+            </tr>
+        </table>
+        {% endif %}
+        <div style="margin-top:10px">
+            <input type="submit" value="Save" />
+            {% if add %}<input type="button" value="Save and Continue" onclick="doSubmit('add+')" />{% endif %}
+            <input type="button" value="Cancel" onclick="window.location='{% url 'members:courses' %}'" />
+        </div>
+    </form>
+</body>
