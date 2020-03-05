@@ -8,9 +8,7 @@
             document.getElementById("frmMain").submit();
         }
         
-        function confirmDelete(name, id) {
-            document.getElementById("hdnMemberID").value = id;
-            document.getElementById("divDeleteMsg").innerText = "Are you sure that you wish to delete member " + name +"?";
+        function confirmDelete() {
             document.getElementById("divDelete").style.display = "block";
         }
     </script>
@@ -19,48 +17,49 @@
     <h1>{{header}}</h1>
     {% if add %}
     <form id="frmMain" action="{% url 'members:add_course' %}" method="post">
-    {% csrf_token %}
-    <input type="hidden" id="hdnAction" name="action" value="add" />
     {% else %}
     <form id="frmMain" action="{% url 'members:edit_course' form.instance.id %}" method="post">
-    {% csrf_token %}
-    <input type="hidden" id="hdnAction" name="action" value="edit" />
     {% endif %}
+        {% csrf_token %}
+        <input type="hidden" id="hdnAction" name="action" value="add" />
         <ul class="ul-form">
             {{form.as_ul}}
         </ul>
-        {% if not add %}
-        <table class="addBorder">
-            <tr>
-                <th>Name</th>
-                <th>Member Course Year</th>
-            </tr>
-            {% if members %}
-            <tr>
-                <td>
-                    <div style="color:red">{{student_error}}</div>
-                    <select name="student">
-                        {% for m in members %}
-                        <option value="{{m.id}}">{{m.last_name}}, {{m.first_name}}</option>
-                        {% endfor %}
-                    </select>
-                </td>
-                <td><input type="button" value="Add" onclick="doSubmit('add')" /></td>
-            </tr>
-            {% endif %}
-            {% for m in students %}
-            <tr>
-                <td>{{m.last_name}}, {{m.first_name}}</td>
-                <td></td>
-            </tr>
+        {% if add %}
+        <ul class="ul-form">
+            {{cform.as_ul}}
+        </ul>
+        {% else %}
+        <select name="sel_class" onchange="doSubmit('change')">
+            <option value="-2"{% if sel_class == -2 %} selected{% endif %}></option>
+            <option value="-1"{% if sel_class == -1 %} selected{% endif %}>Add New Class</option>
+            {% for cl in coursei.class_set.all %}
+            <option value="{{cl.id}}"{% if sel_class == cl.id %} selected{% endif %}>{{cl.when}}</option>
             {% endfor %}
-            </tr>
-        </table>
+        </select>
+        {% if sel_class != -2 %}
+        <ul class="ul-form">
+            {{cform.as_ul}}
+        </ul>
+        {% if sel_class >= 0 %}
+        <input type="button" value="Delete" onclick="confirmDelete()" />
+        {% endif %}
+        {% endif %}
         {% endif %}
         <div style="margin-top:10px">
             <input type="submit" value="Save" />
-            {% if add %}<input type="button" value="Save and Continue" onclick="doSubmit('add+')" />{% endif %}
+            <input type="button" value="Save and Continue" onclick="doSubmit('add+')" />
             <input type="button" value="Cancel" onclick="window.location='{% url 'members:courses' %}'" />
         </div>
     </form>
+    <div class="gray" id="divDelete">
+        <div class="popup">
+            <div>Delete</div>
+            <div>Are you sure that you wish to delete {{cform.instance.when}}?</div>
+            <div>
+                <input type="button" onclick="doSubmit('delete');" value="Yes" />
+                <input type="button" onclick="document.getElementById('divDelete').style.display='';" value="No" />
+            </div>
+        </div>
+    </div>
 </body>

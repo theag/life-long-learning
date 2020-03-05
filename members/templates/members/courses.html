@@ -28,7 +28,7 @@
                 <td><input type="text" name="name" value="{{name}}" /></td>
                 <td>Year:</td>
                 <td>
-                    <select  name="year">
+                    <select name="year">
                         <option value="-1"{% if year == -1 %} selected{% endif %}></option>
                         {% for y in years %}
                         <option value="{{y.id}}"{% if year == y.id %} selected{% endif %}>{{y.value}}</option>
@@ -39,10 +39,30 @@
             <tr>
                 <td>Instructor:</td>
                 <td>
-                    <select  name="instructor">
+                    <select name="instructor">
                         <option value="-1"{% if instructor == -1 %} selected{% endif %}></option>
                         {% for m in members %}
-                        <option value="{{m.id}}"{% if instructor == y.id %} selected{% endif %}>{{m.last_name}}, {{m.first_name}}</option>
+                        <option value="{{m.id}}"{% if instructor == m.id %} selected{% endif %}>{{m}}</option>
+                        {% endfor %}
+                    </select>
+                </td>
+                <td>Semester:</td>
+                <td>
+                    <select name="semester">
+                        <option value="-1"{% if semester == -1 %} selected{% endif %}></option>
+                        {% for s in semesters %}
+                        <option value="{{s.0}}"{% if semester == s.0 %} selected{% endif %}>{{s.1}}</option>
+                        {% endfor %}
+                    </select>
+                </td>
+            </tr>
+            <tr>
+                <td>Location:</td>
+                <td>
+                    <select name="location">
+                        <option value="-1"{% if location == -1 %} selected{% endif %}></option>
+                        {% for l in locations %}
+                        <option value="{{l.id}}"{% if location == l.id %} selected{% endif %}>{{l}}</option>
                         {% endfor %}
                     </select>
                 </td>
@@ -56,25 +76,27 @@
     </form>
     <div style="margin-bottom:10px"><input type="button" value="Add New Course" onclick="window.location = '{% url 'members:add_course' %}'" /></div>
     <table class="addBorder">
+        {% for course in courses %}
         <tr>
-            <th>Name</th>
-            <th>Year</th>
-            <th>Instructor</th>
-            <th>Student Count</th>
-            <th>Description</th>
-        </tr>
-        {% for c in courses %}
-        <tr>
-            <td>{{c.name}}</td>
-            <td>{{c.year.value}}</td>
-            <td>{{c.instructor.last_name}}, {{c.instructor.first_name}}</td>
-            <td>{{c.students.len}}</td>
-            <td>{{c.description}}</td>
-            <td>
-                <a class="plain" href="{% url 'members:edit_course' c.id %}"><i class="material-icons">edit</i></a>
-                <a class="plain" href="javascript:confirmDelete('{{c.name}}',{{c.id}})"><i class="material-icons">delete</i></a>
+            <td colspan="4">
+                <b>Name:</b> {{course.name}}
+                <a class="plain" href="{% url 'members:edit_course' course.id %}"><i class="material-icons">edit</i></a>
+                <a class="plain" href="javascript:confirmDelete('{{course.name}}',{{course.id}})"><i class="material-icons">delete</i></a>
             </td>
         </tr>
+        {% if course.description %}
+        <tr>
+            <td colspan="4">{{course.description}}</td>
+        </tr>
+        {% endif %}
+        {% for class in course.class_set.all %}
+        <tr>
+            <td>{{class.when}}</td>
+            <td>{{class.location}}</td>
+            <td>{{class.instructor}}</td>
+            <td>{{class.student_count}} enrolled</td>
+        </tr>
+        {% endfor %}
         {% endfor %}
     </table>
     <div class="gray" id="divDelete">

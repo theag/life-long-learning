@@ -61,12 +61,12 @@
         </tr>
         {% for member in members %}
         <tr>
-            <td>{{member.last_name}}, {{member.first_name}}</td>
+            <td>{{member}}</td>
             <td>{{member.email}}</td>
             <td>{{member.phone_number}}</td>
             <td>{{member.location.name}}</td>
             <td>{{member.membership_years_display}}</td>
-            <td>{{member.course_set.len}}</td>
+            <td>{{member.courses_taken.len}}</td>
             <td>{{member.is_instructor}}</td>
             <td>{{member.notes}}</td>
             <td>

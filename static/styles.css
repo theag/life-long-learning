@@ -58,8 +58,15 @@ body {
     list-style-type: none;
 }
 
-.ul-form li {
+.ul-form ul {
+    columns: 10px 3;
+    column-gap: 0px;
+    column-rule: 4px double #ff00ff;
+}
+
+.ul-form > li {
     padding-top: 5px;
+    column-span: all;
 }
 
 .ul-form textarea {

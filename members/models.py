@@ -22,6 +22,7 @@ class Member(models.Model):
     phone_number = models.CharField(max_length=12,validators=[RegexValidator(regex='^\d{3}-\d{3}-\d{4}$',message="Phone number must be of the form XXX-XXX-XXXX")])
     membership_years = models.ManyToManyField('Year')
     notes = models.TextField(blank=True)
+    courses_taken = models.ManyToManyField('Class')
     
     def __str__(self):
         return "{}, {}".format(self.last_name,self.first_name)
@@ -35,26 +36,47 @@ class Member(models.Model):
         return rv
         
     def is_instructor(self):
-        if len(self.taught.all()) > 0:
+        if len(self.class_set.all()) > 0:
             return "Yes"
         else:
             return "No"
 
+class Course(models.Model):
+    name = models.CharField(max_length=200)
+    description = models.TextField(blank=True)
+    
+    def __str__(self):
+        return name
+    
+class Class(models.Model):
+    course = models.ForeignKey(Course,on_delete=models.CASCADE)
+    year = models.ForeignKey(Year,on_delete=models.CASCADE)
+    FALL = 1
+    SPRING = 2
+    SEMESTER_CHOICES = [(FALL, 'Fall'), (SPRING, 'Spring')]
+    SEMESTER_ABREVIATIONS = {FALL:'FA',SPRING:'SP'}
+    semester = models.IntegerField(choices=SEMESTER_CHOICES,default=FALL)
+    location = models.ForeignKey(Location,on_delete=models.CASCADE)
+    instructor = models.ForeignKey(Member,on_delete=models.CASCADE)
+    student_count = models.IntegerField(default=0)
+    
+    def when(self):
+        return "{} {}".format(self.year, Class.SEMESTER_ABREVIATIONS[self.semester])
+    
+# FORMS
 class MemberForm(forms.ModelForm):
     class Meta:
         model = Member
-        fields = '__all__'
-        widgets = {'membership_years':forms.CheckboxSelectMultiple(choices=[(i,i) for i in range(2010,2021)])}
-        
-class Course(models.Model):
-    name = models.CharField(max_length=200)
-    year = models.ForeignKey(Year,on_delete=models.CASCADE)
-    instructor = models.ForeignKey(Member,on_delete=models.CASCADE,related_name='taught')
-    description = models.TextField(blank=True)
-    students = models.ManyToManyField(Member)
+        exclude = ['courses_taken']
+        widgets = {'membership_years':forms.CheckboxSelectMultiple()}
 
 class CourseForm(forms.ModelForm):
     class Meta:
         model = Course
-        fields = ['name','year','instructor','description']
+        fields = '__all__'
     
+class ClassForm(forms.ModelForm):
+    class Meta:
+        model = Class
+        fields = ['year','semester','location','instructor','student_count']
+        widgets = {'year':forms.Select()}
