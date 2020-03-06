@@ -2,21 +2,101 @@
 <head>
     <title>Lifelong Learning - Members</title>
     <link href="{% static 'styles.css' %}" type="text/css" rel="stylesheet"></link>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <script>
+        function doSubmit(action) {
+            document.getElementById("hdnAction").value = action;
+            document.getElementById("frmMain").submit();
+        }
+        
+        function confirmDelete(name, id) {
+            document.getElementById("hdnMemberID").value = id;
+            document.getElementById("divDeleteMsg").innerText = "Are you sure that you wish to remove " +name +"?";
+            document.getElementById("divDelete").style.display = "block";
+        }
+        
+        function updateClasses(opt) {
+            var val = opt.options[opt.selectedIndex].value;
+            var cl = document.getElementById("selClass");
+            for(var i = 0; i < cl.options.length; i++) {
+                if(cl.options[i].getAttribute('course') == val) {
+                    cl.options[i].style.display = "";
+                } else {
+                    cl.options[i].style.display = "none";
+                }
+            }
+            cl.selectedIndex = 0;
+        }
+    </script>
 </head>
 <body>
     <h1>{{header}}</h1>
     {% if add %}
-    <form action="{% url 'members:add' %}" method="post">
+    <form id="frmMain" action="{% url 'members:add' %}" method="post">
     {% else %}
-    <form action="{% url 'members:edit' form.instance.id %}" method="post">
+    <form id="frmMain" action="{% url 'members:edit' form.instance.id %}" method="post">
     {% endif %}
         {% csrf_token %}
+        <input type="hidden" id="hdnAction" name="action" value="save" />
+        <input type="hidden" id="hdnMemberID" name="class_id" />
         <ul class="ul-form">
-            {{form.as_ul}}
+        {% for field in form %}
+            {% if field.name == 'notes' %}
+            <li>
+                {% if membership_years_error %}<ul class="errorlist"><li>{{membership_years_error}}</li></ul>{% endif %}
+                <label for="id_membership_years">Membership Years</label>
+                <input type="text" name="membership_years" value="{{membership_years}}" id="id_membership_years" />
+            </li>
+            {% endif %}
+            <li>{{ field.errors }}{{ field.label_tag }} {{ field }}</li>
+        {% endfor %}
         </ul>
-        <div>
+        <div>Courses</div>
+        <table class="addBorder">
+            <tr>
+                <th>Name</th>
+                <th>Semester</th>
+            </tr>
+            <tr>
+                <td>
+                    <select onchange="updateClasses(this)">
+                        <option value="-1"></option>
+                        {% for c in courses %}
+                        <option value="{{c.id}}">{{c.name}}</option>
+                        {% endfor %}
+                    </select>
+                </td>
+                <td>
+                    <select name="class" id="selClass">
+                        <option value="-1" course="-1"></option>
+                        {% for l in classes %}
+                        <option value="{{l.id}}" course="{{l.course.id}}" style="display:none">{{l.when}}</option>
+                        {% endfor %}
+                    </select>
+                </td>
+                <td><a class="plain" href="javascript:doSubmit('class')"><i class="material-icons">add</i></a></td>
+            </tr>
+            {% for l in course_list %}
+            <tr>
+                <td>{{l.course.name}}</td>
+                <td>{{l.when}}</td>
+                <td><a class="plain" href="javascript:confirmDelete('{{l.course.name}} {{l.when}}',{{l.id}})"><i class="material-icons">remove</i></a></td>
+            </tr>
+            {% endfor %}
+        </table>
+        <div style="margin-top:10px">
             <input type="submit" value="Save" />
             <input type="button" value="Cancel" onclick="window.location='{% url 'members:index' %}'" />
         </div>
     </form>
+    <div class="gray" id="divDelete">
+        <div class="popup">
+            <div>Remove</div>
+            <div id="divDeleteMsg"></div>
+            <div>
+                <input type="button" onclick="doSubmit('delete');" value="Yes" />
+                <input type="button" onclick="document.getElementById('divDelete').style.display='';" value="No" />
+            </div>
+        </div>
+    </div>
 </body>

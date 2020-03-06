@@ -44,15 +44,36 @@ def add(request):
 def edit(request, member_id):
     m = Member.objects.get(pk=member_id)
     if request.POST:
-        mf = MemberForm(request.POST, instance=m)
-        if mf.is_valid():
-            mf.save()
-            return redirect('members:index')
-        else:
-            context = {'form':mf, 'header':'Edit Member'}
-            return render(request, 'members/edit.html', context)
+        mf = MemberForm(request.POST, instance=m, prefix="member")
+        context = {'header':'Edit Member',
+            'form':mf,
+            'membership_years':request.POST['membership_years'],
+            'courses':Course.objects.all().order_by('name'),
+            'classes':Class.objects.all().order_by('year','-semester'),
+            'course_list':m.courses_taken.order_by('course__name','year','-semester')}
+        action = request.POST['action']
+        if action == 'class' and request.POST['class'] != "-1":
+            m.courses_taken.add(Class.objects.get(pk=request.POST['class']))
+            m.save()
+        elif action == "delete":
+            m.courses_taken.remove(Class.objects.get(pk=request.POST['class_id']))
+            m.save()
+        elif action == 'save':
+            if mf.is_valid():
+                if m.is_valid_membership_years(request.POST['membership_years']):
+                    mf.save()
+                    m.set_membership_years(request.POST['membership_years'])
+                    return redirect('members:index')
+                else:
+                    context['membership_years_error'] = "Membership years must be a comma seperated list of years."
+        return render(request, 'members/edit.html', context)
     else:
-        context = {'form':MemberForm(instance=m), 'header':'Edit Member'}
+        context = {'form':MemberForm(instance=m, prefix='member'),
+            'header':'Edit Member',
+            'membership_years':m.membership_years_display(),
+            'courses':Course.objects.all().order_by('name'),
+            'classes':Class.objects.all().order_by('year','-semester'),
+            'course_list':m.courses_taken.order_by('course__name','year','-semester')}
         return render(request, 'members/edit.html', context)
 #courses
 def courses(request):

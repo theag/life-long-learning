@@ -1,6 +1,7 @@
 from django.db import models
 from django import forms
 from django.core.validators import RegexValidator
+import re
 
 class Location(models.Model):
     name = models.CharField(max_length=200)
@@ -40,6 +41,25 @@ class Member(models.Model):
             return "Yes"
         else:
             return "No"
+            
+    def is_valid_membership_years(self, str):
+        print(str)
+        m = re.search('^ *\d{4}( *, *\d{4})* *$',str)
+        print(m)
+        return m is not None
+    
+    def set_membership_years(self, str):
+        a = str.split(',')
+        years = []
+        for v in a:
+            y = int(v)
+            year = Year.objects.get(value=y)
+            if year is None:
+                year = Year(value=y)
+                year.save()
+            years.append(year)
+        self.membership_years.set(years)
+        self.save()
 
 class Course(models.Model):
     name = models.CharField(max_length=200)
@@ -67,8 +87,7 @@ class Class(models.Model):
 class MemberForm(forms.ModelForm):
     class Meta:
         model = Member
-        exclude = ['courses_taken']
-        widgets = {'membership_years':forms.CheckboxSelectMultiple()}
+        exclude = ['courses_taken','membership_years']
 
 class CourseForm(forms.ModelForm):
     class Meta:
