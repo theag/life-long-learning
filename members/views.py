@@ -4,8 +4,9 @@ import datetime
 
 def do_year_check():
     now = datetime.datetime.now()
-    y = Year.objects.get(value=now.year)
-    if not y:
+    try:
+        y = Year.objects.get(value=now.year)
+    except:
         y = Year(value=now.year)
         y.save()
 
